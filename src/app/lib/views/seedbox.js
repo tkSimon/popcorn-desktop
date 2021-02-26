@@ -99,17 +99,21 @@
 
 			$('.seedbox-torrent-list > ul.file-list').append(
 				`<li class="${className}" id="${torrent.infoHash}" data-season="" data-episode="">
-                <a href="#" class="episodeData">
-                    <span>&nbsp;</span>
-                    <div id="title-${torrent.infoHash}">${App.plugins.mediaName.getMediaName(torrent)}</div>
-                </a>
+					<div class="title">
+						<a href="#" class="episodeData">
+							<span>&nbsp;</span>
+							<div id="title-${torrent.infoHash}">${App.plugins.mediaName.getMediaName(torrent)}</div>
+						</a>
+					</div>
 
-                <i class="fa fa-trash watched trash-torrent tooltipped" id="trash-${torrent.infoHash}" title="Remove" data-toggle="tooltip" data-placement="left"></i>
-                <i class="fa fa-play watched resume-torrent tooltipped" id="play-${torrent.infoHash}"  title="Resume" data-toggle="tooltip" data-placement="left" style="display: ${torrent.paused ? '' : 'none'};"></i>
-                <i class="fa fa-pause-circle watched pause-torrent tooltipped" id="resume-${torrent.infoHash}"  title="Pause" data-toggle="tooltip" data-placement="left" style="display: ${torrent.paused ? 'none' : ''};"></i>
-                <i class="fa fa-upload watched" id="upload-${torrent.infoHash}"> 0 Kb/s</i>
-                <i class="fa fa-download watched" id="download-${torrent.infoHash}"> 0 Kb/s</i>
-              </li>`
+					<div class="indicators">
+						<i class="fa fa-download watched" id="download-${torrent.infoHash}"> 0 Kb/s</i>
+						<i class="fa fa-upload watched" id="upload-${torrent.infoHash}"> 0 Kb/s</i>
+						<i class="fa fa-pause-circle watched pause-torrent tooltipped" id="resume-${torrent.infoHash}"  title="Pause" data-toggle="tooltip" data-placement="left" style="display: ${torrent.paused ? 'none' : ''};"></i>
+						<i class="fa fa-play watched resume-torrent tooltipped" id="play-${torrent.infoHash}"  title="Resume" data-toggle="tooltip" data-placement="left" style="display: ${torrent.paused ? '' : 'none'};"></i>
+						<i class="fa fa-trash watched trash-torrent tooltipped" id="trash-${torrent.infoHash}" title="Remove" data-toggle="tooltip" data-placement="left"></i>
+					</div>
+				</li>`
 			);
 
 			$('.seedbox .episodeData > span').each(function (i, el) { 
@@ -161,7 +165,7 @@
 		},
 
 		getTorrentFromEvent(e, id = null) {
-			const hash = id || e.currentTarget.parentNode.getAttribute('id');
+			const hash = id || $(e.currentTarget).closest(".tab-torrent").attr('id');
 			return App.WebTorrent.torrents.find(torrent => torrent.infoHash === hash);
 		},
 
