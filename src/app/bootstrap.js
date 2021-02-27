@@ -1,3 +1,10 @@
+process.on('warning', function(warning) {
+    console.warn(`${warning.name}: ${warning.message}\n${warning.stack}\n`);
+});
+process.on('unhandledRejection', function(reason, promise) {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 (function(App) {
   'use strict';
   App.start();
