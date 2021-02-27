@@ -166,7 +166,7 @@
 		},
 
 		getTorrentFromEvent(e, id = null) {
-			const hash = id || $(e.currentTarget).closest(".tab-torrent").attr('id');
+			const hash = id || $(e.currentTarget).closest('.tab-torrent').attr('id');
 			return App.WebTorrent.torrents.find(torrent => torrent.infoHash === hash);
 		},
 
