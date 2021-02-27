@@ -1,0 +1,46 @@
+---
+include:
+    - template: 'Workflows/Branch-Pipelines.gitlab-ci.yml'
+
+default:
+    image: node:12-alpine
+    before_script:
+        - apk add git
+
+variables:
+    YARN_CACHE_FOLDER: .yarn
+
+stages:
+    - test
+    - package
+
+Test:
+    stage: test
+    script:
+        - yarn config set yarn-offline-mirror .yarn/
+        - yarn --ignore-engines --ignore-scripts
+        - yarn run test
+    cache:
+        key: $CI_PROJECT_PATH_SLUG
+        paths:
+            - .yarn
+
+Package:
+    stage: package
+    rules:
+        - if: '$CI_COMMIT_BRANCH == "master" || $CI_COMMIT_TAG || $PACKAGE'
+    script:
+        - yarn config set yarn-offline-mirror .yarn/
+        - yarn --ignore-engines --ignore-scripts
+        - npx --no-install gulp build
+        - npx --no-install gulp compresszip
+    cache:
+        policy: pull
+        key: $CI_PROJECT_PATH_SLUG
+        paths:
+            - .yarn
+    artifacts:
+        name: PopcornTime
+        paths:
+            - build/*.zip
+        expire_in: 1 week
