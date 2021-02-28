@@ -1,5 +1,6 @@
 (function (App) {
     'use strict';
+    const marked = require('marked');
 
     var About = Marionette.View.extend({
         template: '#about-tpl',
@@ -44,7 +45,23 @@
         showChangelog: function () {
             fs.readFile('./CHANGELOG.md', 'utf-8', function (err, contents) {
                 if (!err) {
-                    $('.changelog-text').html(contents.replace(/\n/g, '<br />'));
+                    // render changelog html
+                    let changelogText = $('.changelog-text');
+                    changelogText.html(marked(contents));
+
+                    // change all links that have href attribute to open in
+                    // external app
+                    let links = $('a[href]', changelogText);
+                    links.each(function (i, el) {
+                        el = $(el);
+                        let url = el.attr('href');
+                        el.attr('href', '');
+                        el.click(function (event) {
+                            nw.Shell.openExternal(url);
+                            event.preventDefault();
+                        });
+                    });
+
                     $('.changelog-overlay').show();
                 } else {
                     nw.Shell.openExternal(Settings.changelogUrl);

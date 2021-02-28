@@ -69,6 +69,7 @@
     "jschardet": "1.6.0",
     "json-rpc2": "1.x.x",
     "lodash": "^4.17.19",
+    "marked": "^2.0.1",
     "memoizee": "0.x.x",
     "mkdirp": "*",
     "moment": ">=2.22.2",
