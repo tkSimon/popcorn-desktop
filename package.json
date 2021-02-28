@@ -11,7 +11,7 @@
   },
   "license": "GPL-3.0",
   "main": "src/app/index.html",
-  "version": "0.4.4",
+  "version": "0.4.5-next",
   "releaseName": "Love in the Time of Corona",
   "scripts": {
     "build": "gulp build",
@@ -105,6 +105,7 @@
     "del": "^3.x.x",
     "git-rev": "^0.2.1",
     "gulp": "^4.0.2",
+    "gulp-conventional-changelog": "^2.0.35",
     "gulp-filter": "^5.1.0",
     "gulp-gzip": "^1.4.2",
     "gulp-jsbeautifier": "^2.1.2",

@@ -25,7 +25,8 @@ const gulp = require('gulp'),
   path = require('path'),
   exec = require('child_process').exec,
   spawn = require('child_process').spawn,
-  pkJson = require('./package.json');
+  pkJson = require('./package.json'),
+  conventionalChangelog = require('gulp-conventional-changelog');
 
 /***********
  *  custom  *
@@ -472,6 +473,25 @@ gulp.task('injectgit', () => {
     });
 });
 
+// update CHANGELOG.md (used in 'About')
+gulp.task('changelog', () => {
+    return gulp.src('CHANGELOG.md')
+    .pipe(conventionalChangelog({
+      // conventional-changelog options go here
+      preset: 'angular',
+      releaseCount: 0
+    }, {
+      // context goes here
+    }, {
+      // git-raw-commits options go here
+    }, {
+      // conventional-commits-parser options go here
+    }, {
+      // conventional-changelog-writer options go here
+    }))
+    .pipe(gulp.dest('./'));
+});
+
 // compile styl files
 gulp.task('css', () => {
   const sources = 'src/app/styl/*.styl',
@@ -713,7 +733,7 @@ gulp.task(
 // build app from sources
 gulp.task(
   'build',
-  gulp.series('injectgit', 'css', 'nwjs', function(done) {
+  gulp.series(gulp.parallel('injectgit', 'css', 'changelog'), 'nwjs', function(done) {
     // default task code here
     done();
   })
