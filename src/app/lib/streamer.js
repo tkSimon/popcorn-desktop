@@ -54,7 +54,7 @@
 
                   App.WebTorrent.add(data, {
                       path      : App.settings.tmpLocation,
-                      maxConns  : 5,
+                      maxConns  : 10,
                       dht       : true,
                       announce  : Settings.trackers.forced,
                       tracker   : Settings.trackers.forced
@@ -90,7 +90,7 @@
 
                   App.WebTorrent.add(data, {
                       path      : App.settings.downloadsLocation,
-                      maxConns  : 5,
+                      maxConns  : 10,
                       dht       : true,
                       announce  : Settings.trackers.forced,
                       tracker   : Settings.trackers.forced
@@ -146,7 +146,7 @@
             }
             App.WebTorrent.add(uri, {
                 path      : App.settings.separateDownloadsDir ? App.settings.downloadsLocation : App.settings.tmpLocation,
-                maxConns  : 5,
+                maxConns  : 10,
                 dht       : true,
                 announce  : Settings.trackers.forced,
                 tracker   : Settings.trackers.forced
@@ -163,9 +163,17 @@
 
                 if (Settings.activateSeedbox) {
                     this.torrent.pause();
-                    // complete fause torrent, stop download data
+                    // complete pause torrent, stop download data
+                    const removedPeers = [];
                     for (const id in this.torrent._peers) {
+                        // collect peers, need to do this before calling removePeer!
+                        removedPeers.push(this.torrent._peers[id].addr);
+
                         this.torrent.removePeer(id);
+                    }
+                    if(removedPeers.length > 0) {
+                        // store removed peers, so we can re-add them when resuming
+                        this.torrent.pctRemovedPeers = removedPeers;
                     }
 
                     if (this.torrent._xsRequests) {
@@ -251,6 +259,13 @@
                     if (t.infoHash === infoHash) {
                         this.torrent = t;
                         this.torrent.resume();
+                        if(this.torrent.pctRemovedPeers) {
+                            const peers = this.torrent.pctRemovedPeers;
+                            this.torrent.pctRemovedPeers = undefined;
+                            for (let peer of peers) {
+                                this.torrent.addPeer(peer);
+                            }
+                        }
                         this.torrentModel.set('torrent', this.torrent);
                         resolve(this.torrent);
                     }

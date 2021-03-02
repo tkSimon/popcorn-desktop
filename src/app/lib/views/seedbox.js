@@ -137,7 +137,7 @@
 			this.addTorrentToList(torrent);
 
 			const activeTorrentCount = App.WebTorrent.torrents.filter(item => !item.paused).length;
-			if (!torrent.paused && activeTorrentCount >= Settings.maxActiveTorrents) {
+			if (!torrent.paused && activeTorrentCount > Settings.maxActiveTorrents) {
 				this.pauseTorrent(torrent);
 				torrent.paused = true;
 			}
@@ -174,10 +174,18 @@
 			torrent.pause();
 
 			// completely pause this torrent, stop download data (pause only stops new connections)
+			const removedPeers = [];
 			for (const id in torrent._peers) {
 				if (torrent._peers.hasOwnProperty(id)) {
+					// collect peers, need to do this before calling removePeer!
+					removedPeers.push(torrent._peers[id].addr);
+
 					torrent.removePeer(id);
 				}
+			}
+			if(removedPeers.length > 0) {
+				// store removed peers, so we can re-add them when resuming
+				torrent.pctRemovedPeers = removedPeers;
 			}
 
 			torrent._xsRequests.forEach(req => {
@@ -201,6 +209,13 @@
 				torrent.resume();
 				$(`#resume-${torrent.infoHash}`).show();
 				$(`#play-${torrent.infoHash}`).hide();
+				if(torrent.pctRemovedPeers) {
+					const peers = torrent.pctRemovedPeers;
+					torrent.pctRemovedPeers = undefined;
+					for (let peer of peers) {
+						torrent.addPeer(peer);
+					}
+				}
 			}
 		},
 
@@ -214,7 +229,7 @@
 							rimraf(path.join(App.settings.downloadsLocation, torrent.name), () => {});
 						}
 					} catch(err) {}
-					$('.notification_alert').text(i18n.__('Cache files deleted')).fadeIn('fast').delay(1500).fadeOut('fast');
+					$('.notification_alert').stop().text(i18n.__('Cache files deleted')).fadeIn('fast').delay(1500).fadeOut('fast');
 				} else if (App.settings.delSeedboxCache === 'ask') {
 					toDel.push(torrent.name);
 					var delCache = function () {
@@ -227,7 +242,7 @@
 								}
 							} catch(err) {}
 						}
-						$('.notification_alert').text(i18n.__('Cache files deleted')).fadeIn('fast').delay(1500).fadeOut('fast');
+						$('.notification_alert').stop().text(i18n.__('Cache files deleted')).fadeIn('fast').delay(1500).fadeOut('fast');
 						toDel = [];
 					};
 					var keepCache = function () {
